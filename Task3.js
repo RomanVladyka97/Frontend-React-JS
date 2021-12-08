@@ -1,17 +1,25 @@
 colorLog("TASK №3", "info");
 function printSeasonByMonth(month) {
-    let season = 'time of year is - ';
+    let season = 'The month of ' + month + ' is - ';
     switch (month) {
-        case "SEPTEMBER", "NOVEMBER" :
+        case "SEPTEMBER" :
+        case "OCTOBER"   :
+        case "NOVEMBER"  :
             season += 'autumn';
             break;
-        case "DECEMBER", "FEBRUARY" :
+        case "DECEMBER" :
+        case "FEBRUARY" :
+        case "JANUARY"  :
             season += 'winter';
             break;
-        case 'APRIL', "MAY" :
+        case 'MARCH' :
+        case 'APRIL' :
+        case "MAY"   :
             season += 'spring';
             break;
-        case "JUNE", "JULY", "AUGUST" :
+        case "JUNE"   : 
+        case "JULY"   : 
+        case "AUGUST" :
             season += 'summer'; 
             break;  
         default: 
