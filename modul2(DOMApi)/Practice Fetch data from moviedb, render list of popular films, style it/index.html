@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./css/style.css" />
+    <title>TheMovieDB PoC</title>
+</head>
+<body>
+    <div class="wrapper">
+        <header class="header">
+            <div class="header__container container">
+                <h1>TheMovieDB PoC</h1>
+            </div>
+        </header>
+        <div id="loading-procces" class="main__loading">
+            <div class="main__loading-icon"></div>
+            <h3>Завантаження контенту</h3>
+        </div>
+        <main class="main">
+            <div class="main__container container">
+                <div class="main__title"><h1>Що зараз популярне:</h2></div>
+                <div id="content" class="main__content">
+                </div>
+            </div>
+        </main>
+        <footer class="footer">
+            <div class="footer__container container">
+                <h1>Practice: Fetch data from moviedb, render list of popular films, style it</h1>
+            </div>
+        </footer>
+    </div>
+    <script type="module" src="./src/script.js"></script>
+</body>
+</html>
