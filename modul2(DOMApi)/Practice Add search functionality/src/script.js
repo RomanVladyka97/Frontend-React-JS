@@ -1,22 +1,21 @@
 // клас для фетчу фільмів
 class Api {
-    constructor(inputText, page){
-
+    constructor(){
         if(typeof Api.instance === 'object'){
-            Api.instance.inputText = inputText;
-            Api.instance.page = `page=${page}`;
             return Api.instance;
         }
         this.popUrl = "https://api.themoviedb.org/3/movie/popular?";
         this.serchUrl = "https://api.themoviedb.org/3/search/movie?";
         this.apiKey = "api_key=c1f1bfcf10259d5f3d7bd66da82c97f0&";
         this.language = "language=uk&";
-        this.page = `page=${page}`;
-        this.inputText = inputText;
+        this.page = `page=1`;
+        this.inputText = undefined;
         Api.instance = this;
         return this;
     }
-    async fetchPopularMovies() {
+    async fetchPopularMovies(inputText, page) {
+        this.inputText = inputText;
+        this.page = `page=${page}`;
         let uri = `query=${encodeURI(this.inputText)}`;
         let response;
         if(this.inputText === undefined){
@@ -80,9 +79,9 @@ popNow.addEventListener('click', (evt) => {
 
 // Фетч запит до сервака - отримуємо масиви з фільмами
 const  fetchMovies = async (inputResult, page) => {
-    let getPopularMovies = new Api(inputResult, page);
+    let getPopularMovies = new Api();
     console.log(getPopularMovies);
-    let moviesList = await getPopularMovies.fetchPopularMovies();
+    let moviesList = await getPopularMovies.fetchPopularMovies(inputResult, page);
     return moviesList;
 }
 
