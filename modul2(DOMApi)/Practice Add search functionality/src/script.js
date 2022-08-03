@@ -102,23 +102,6 @@ const proccesLoadingMovie = async (inputResult) => {
     }else{
         showBtnLoadMore(false);
     }
-    getElementContent.addEventListener('click', (evt) => {
-        let ElementLikeBtn = evt.target.closest('#fa-heart');
-        let elementFilm = evt.target.closest('div.card');
-        if(ElementLikeBtn !== null){
-            ElementLikeBtn.classList.toggle('fa-solid');
-            let isfavorite = elementFilm.getAttribute('isfavorite')
-            console.log(isfavorite)
-            if (isfavorite === true) {
-                elementFilm.removeAttribute('isfavorite')
-                removeFromFavorite(elementFilm.id);
-            } else {
-                elementFilm.setAttribute('isfavorite', true)
-                saveToFavorite(elementFilm.id, 'isFavorit');
-            }
-        }
-
-    });
 }
 
 // формуємо шаблон карточки фільму для фронта
@@ -194,13 +177,6 @@ const showBtnLoadMore = (show) => {
     } else {
         btnLoad.setAttribute('hidden', true);
     }
-}
-
-const saveToFavorite = (movieId, isFavorite) => {
-    localStorage.setItem(`${movieId}`, `${isFavorite}`);
-}
-const removeFromFavorite = (movieId, isFavorite) => {
-    localStorage.removeItem(`${movieId}`)
 }
 
 proccesLoadingMovie(undefined);

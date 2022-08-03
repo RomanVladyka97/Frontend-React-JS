@@ -143,21 +143,6 @@ img{
     color: white;
 }
 
-.card__follow-box{
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    top: 355px;
-    left: 200px;
-    z-index: 1;
-    background-color: white;
-    color: #032541;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    cursor: pointer;
-}
 .card__follow-box:hover{
     box-shadow: 4px 3px 3px rgb(51, 50, 51);
 }
