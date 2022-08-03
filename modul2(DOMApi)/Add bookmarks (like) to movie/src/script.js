@@ -16,11 +16,9 @@ class Movie {
     }
 }
 const delFavMovie = (id) => {
-    console.log(id);
     let CurFavMovies = getFavMovies();
     if(CurFavMovies !== null){
-        let modifyCurFavMovies = CurFavMovies.map((favMovies) => (Object.values(favMovies))[0]!= id);
-        console.log(modifyCurFavMovies);
+        let modifyCurFavMovies = CurFavMovies.filter((favMovies) => (Object.values(favMovies))[0]!== id);
         localStorage.setItem(`favMovies`, JSON.stringify(modifyCurFavMovies));
     }
 }
@@ -174,7 +172,6 @@ const cardTemplate = ({poster_path, id, title}) => {
         </a>
         <h2 class="card__title">${title}</h2>
         </div>`;  
-     
     return result
 }
 //
