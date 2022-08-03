@@ -1,3 +1,29 @@
+// Клас фільму
+class Movie {
+    constructor(id, imgUrl, name, isFavorite){
+        this.id = id;
+        this.imgUrl = imgUrl;
+        this.name = name;
+        this.isFavorite = isFavorite;
+    }
+    saveMovie(){
+        let modifyCurFavMovies = getFavMovies();
+        if(modifyCurFavMovies === null){
+            modifyCurFavMovies = [];
+        }
+        modifyCurFavMovies.unshift(this);
+        localStorage.setItem(`favMovies`, JSON.stringify(modifyCurFavMovies));
+    }
+}
+const delFavMovie = (id) => {
+    console.log(id);
+    let CurFavMovies = getFavMovies();
+    if(CurFavMovies !== null){
+        let modifyCurFavMovies = CurFavMovies.map((favMovies) => (Object.values(favMovies))[0]!= id);
+        console.log(modifyCurFavMovies);
+        localStorage.setItem(`favMovies`, JSON.stringify(modifyCurFavMovies));
+    }
+}
 // клас для фетчу фільмів
 class Api {
     constructor(){
@@ -85,6 +111,38 @@ popNow.addEventListener('click', (evt) => {
     proccesLoadingMovie(userSerchInput);
 })
 
+let getElementContent = document.getElementById("content");
+getElementContent.addEventListener('click', (evt) => {
+    let ElementLikeBtn = evt.target.closest('#fa-heart');
+    let elementFilm = evt.target.closest('div.card');
+    if(ElementLikeBtn !== null){
+        ElementLikeBtn.classList.toggle('fa-solid');
+        let isfavorite = elementFilm.hasAttribute('isfavorite');
+        console.log(elementFilm);
+        if (isfavorite === true) {
+            delFavMovie(elementFilm.id);
+            elementFilm.removeAttribute('isfavorite');
+            localStorage.removeItem(`${elementFilm.id}`);
+        } else {
+           // localStorage.setItem(`${elementFilm.id}`, 'isfavorite');
+           // elementFilm.setAttribute('isfavorite', true);
+            let newFavMovie = new Movie(elementFilm.id, elementFilm.children[0].children[0].src,
+                elementFilm.children[2].innerHTML, isfavorite);
+            newFavMovie.saveMovie();    
+
+            localStorage.setItem('movies', `{${elementFilm.id} : isfavorite}`);
+            elementFilm.setAttribute('isfavorite', true);
+
+        }
+    }
+});
+
+const getFavMovies = () => {
+    let curFavMovies = [];
+    curFavMovies = localStorage.getItem('favMovies');
+    return JSON.parse(curFavMovies);
+}
+
 // Фетч фільмів та їх рендер на фронт
 const proccesLoadingMovie = async (inputResult) => {
     let arrOfMovies;
@@ -93,7 +151,6 @@ const proccesLoadingMovie = async (inputResult) => {
     } else {
         arrOfMovies = await fetchMovies(inputResult, curentPage);
     }
-    let getElementContent = document.getElementById("content");
     changeChapterName(inputResult);
     renderMovies(arrOfMovies, getElementContent, inputResult);
     showLoadingProcces(false);
@@ -102,42 +159,25 @@ const proccesLoadingMovie = async (inputResult) => {
     }else{
         showBtnLoadMore(false);
     }
-    getElementContent.addEventListener('click', (evt) => {
-        let ElementLikeBtn = evt.target.closest('#fa-heart');
-        let elementFilm = evt.target.closest('div.card');
-        if(ElementLikeBtn !== null){
-            ElementLikeBtn.classList.toggle('fa-solid');
-            let isfavorite = elementFilm.getAttribute('isfavorite')
-            console.log(isfavorite)
-            if (isfavorite === true) {
-                elementFilm.removeAttribute('isfavorite')
-                removeFromFavorite(elementFilm.id);
-            } else {
-                elementFilm.setAttribute('isfavorite', true)
-                saveToFavorite(elementFilm.id, 'isFavorit');
-            }
-        }
-
-    });
 }
 
 // формуємо шаблон карточки фільму для фронта
 const cardTemplate = ({poster_path, id, title}) => {
     let result = '';
-    result = `<div id="${id}" class="card">
+    let isFavorite = localStorage.getItem(`${id}`);
+    result = `<div ${(isFavorite == 'isfavorite') ? 'isfavorite="true"' : ''} id="${id}" class="card">
         <div class="card-image">
             <img src="https://image.tmdb.org/t/p/w300${poster_path}" alt="image">
         </div>
         <a class="card__follow-box follow-box-active">
-            <i id="fa-heart" class="fa-heart fa-regular fa-2xl"></i>
+            <i id="fa-heart" class="fa-heart fa-regular fa-2xl ${(isFavorite == 'isfavorite') ? 'fa-solid':''}"></i>
         </a>
         <h2 class="card__title">${title}</h2>
         </div>`;  
      
     return result
 }
-
-// 
+//
 const changeChapterName = (inputResult) => {
     let chapterTitle = document.querySelector('#main-title'); 
     let textH2 = chapterTitle.querySelector('h2');
@@ -145,8 +185,7 @@ const changeChapterName = (inputResult) => {
         textH2.innerHTML = `Найпопулярніші фільми на даний час`;
     }else{
         textH2.innerHTML = `Результат пошуку фільму: ${inputResult}`;
-    }
-    
+    }   
 }
 
 // рендеремо контент (список фільмів) на фронт 
@@ -194,13 +233,6 @@ const showBtnLoadMore = (show) => {
     } else {
         btnLoad.setAttribute('hidden', true);
     }
-}
-
-const saveToFavorite = (movieId, isFavorite) => {
-    localStorage.setItem(`${movieId}`, `${isFavorite}`);
-}
-const removeFromFavorite = (movieId, isFavorite) => {
-    localStorage.removeItem(`${movieId}`)
 }
 
 proccesLoadingMovie(undefined);
