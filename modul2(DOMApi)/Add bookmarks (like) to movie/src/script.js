@@ -110,27 +110,20 @@ popNow.addEventListener('click', (evt) => {
 })
 
 let getElementContent = document.getElementById("content");
-getElementContent.addEventListener('click', (evt) => {
+    getElementContent.addEventListener('click', (evt) => {
     let ElementLikeBtn = evt.target.closest('#fa-heart');
     let elementFilm = evt.target.closest('div.card');
     if(ElementLikeBtn !== null){
         ElementLikeBtn.classList.toggle('fa-solid');
         let isfavorite = elementFilm.hasAttribute('isfavorite');
-        console.log(elementFilm);
         if (isfavorite === true) {
             delFavMovie(elementFilm.id);
             elementFilm.removeAttribute('isfavorite');
-            localStorage.removeItem(`${elementFilm.id}`);
         } else {
-           // localStorage.setItem(`${elementFilm.id}`, 'isfavorite');
-           // elementFilm.setAttribute('isfavorite', true);
             let newFavMovie = new Movie(elementFilm.id, elementFilm.children[0].children[0].src,
-                elementFilm.children[2].innerHTML, isfavorite);
+                elementFilm.children[2].innerHTML, true);
             newFavMovie.saveMovie();    
-
-            localStorage.setItem('movies', `{${elementFilm.id} : isfavorite}`);
             elementFilm.setAttribute('isfavorite', true);
-
         }
     }
 });
@@ -160,15 +153,14 @@ const proccesLoadingMovie = async (inputResult) => {
 }
 
 // формуємо шаблон карточки фільму для фронта
-const cardTemplate = ({poster_path, id, title}) => {
+const cardTemplate = ({poster_path, id, title}, isFavMovie) => {
     let result = '';
-    let isFavorite = localStorage.getItem(`${id}`);
-    result = `<div ${(isFavorite == 'isfavorite') ? 'isfavorite="true"' : ''} id="${id}" class="card">
+    result = `<div ${(isFavMovie === true) ? 'isfavorite="true"' : ''} id="${id}" class="card">
         <div class="card-image">
             <img src="https://image.tmdb.org/t/p/w300${poster_path}" alt="image">
         </div>
         <a class="card__follow-box follow-box-active">
-            <i id="fa-heart" class="fa-heart fa-regular fa-2xl ${(isFavorite == 'isfavorite') ? 'fa-solid':''}"></i>
+            <i id="fa-heart" class="fa-heart fa-regular fa-2xl ${(isFavMovie === true) ? 'fa-solid':''}"></i>
         </a>
         <h2 class="card__title">${title}</h2>
         </div>`;  
@@ -195,15 +187,21 @@ const renderMovies = (arrOfMovies, getElement, inputResult) => {
     }
     
     let newContent = ``;
+    let curFavMovies = getFavMovies();
+    if(curFavMovies === null){
+        curFavMovies = [];
+    }
+    let isFavorite;
     newContent = newContent + arrOfMovies.results.reduce((acc, cur) => {
-        acc += cardTemplate(cur, inputResult); 
+        curFavMovies.find((element) => {isFavorite = Object.values(element).includes(`${cur.id}`);
+        return isFavorite;});
+        acc += cardTemplate(cur, isFavorite);
         return acc}, "");
     if(curentPage > 1){
         getElement.insertAdjacentHTML('beforeend', newContent);
     } else {
         getElement.innerHTML = newContent;
-    }  
-    
+    }   
 }
 
 // Показ плашки Загрузка на Фронті під час фетчингу фільмів
