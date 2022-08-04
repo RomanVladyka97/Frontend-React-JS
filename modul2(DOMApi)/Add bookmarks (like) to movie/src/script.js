@@ -1,9 +1,9 @@
 // Клас фільму
 class Movie {
-    constructor(id, imgUrl, name, isFavorite){
+    constructor(id, poster_path, title, isFavorite){
         this.id = id;
-        this.imgUrl = imgUrl;
-        this.name = name;
+        this.poster_path = poster_path;
+        this.title = title;
         this.isFavorite = isFavorite;
     }
     saveMovie(){
@@ -99,7 +99,7 @@ btnLoad.addEventListener('click', (evt) => {
     proccesLoadingMovie(userSerchInput);
 })
 
-//Завантажити олюблені фільми
+//Завантажити популярні фільми
 let popNow = document.querySelector('#pop-now');
 popNow.addEventListener('click', (evt) => {
     showBtnLoadMore(false);
@@ -107,6 +107,14 @@ popNow.addEventListener('click', (evt) => {
     curentPage = 1;
     userSerchInput = undefined;
     proccesLoadingMovie(userSerchInput);
+})
+
+let eventFavMovies = document.querySelector('#bookmarks');
+eventFavMovies.addEventListener('click', (evt) => {
+    showBtnLoadMore(false);
+    showLoadingProcces(true);
+    proccesLoadFavMovies(getElementContent);
+    showLoadingProcces(false);
 })
 
 let getElementContent = document.getElementById("content");
@@ -186,7 +194,7 @@ const renderMovies = (arrOfMovies, getElement, inputResult) => {
         cauntResult.innerHTML = `Знайдено фільмів:${arrOfMovies.total_results}`;
     }
     
-    let newContent = ``;
+    let newContent = '';
     let curFavMovies = getFavMovies();
     if(curFavMovies === null){
         curFavMovies = [];
@@ -230,6 +238,17 @@ const showBtnLoadMore = (show) => {
     }
 }
 
+const proccesLoadFavMovies = (content) => {
+    let curFavMovies = getFavMovies();
+    if(curFavMovies === null){
+        curFavMovies = [];
+    }
+    let newContent = '';
+    newContent = newContent + curFavMovies.reduce((acc, cur) => {
+        acc += cardTemplate(cur, true);
+        return acc}, "");
+    content.innerHTML = newContent;
+}
 proccesLoadingMovie(undefined);
 
 

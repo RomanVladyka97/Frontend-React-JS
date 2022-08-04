@@ -29,11 +29,13 @@ html,body{
 }
 .header__title{
     color: white;
-    font-size: 22px;
+    font-size: 28px;
     font-weight: bold;
     cursor: pointer;
     text-decoration: none;
     transition: all 0.5s;
+    border-right: white solid 7px;
+    padding-right: 15px;
 }
 .header__title:hover{
     color: rgb(209, 212, 176);
@@ -53,13 +55,19 @@ html,body{
     margin-right: 20px;
     transition: all 0.5s;
     cursor: default;
+    cursor: pointer;
 }
 .pop{
-    cursor: pointer;
+    margin-right: 50px;
 }
 .pop:hover{
     color: rgb(209, 212, 176);
 }
+
+.fav:hover{
+    color: rgb(209, 212, 176);
+}
+
 .header__serch{
     display: flex;
     justify-content: space-between;
@@ -67,6 +75,7 @@ html,body{
     border: #cccccc solid 3px; 
     border-radius: 3px;
     padding: 3px;
+    margin-left: 330px;
 }
 .serch-title{
     margin-right: 8px;
