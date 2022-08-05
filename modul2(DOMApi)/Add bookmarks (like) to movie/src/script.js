@@ -22,6 +22,11 @@ const delFavMovie = (id) => {
         localStorage.setItem(`favMovies`, JSON.stringify(modifyCurFavMovies));
     }
 }
+const getFavMovies = () => {
+    let curFavMovies = [];
+    curFavMovies = localStorage.getItem('favMovies');
+    return JSON.parse(curFavMovies);
+}
 // клас для фетчу фільмів
 class Api {
     constructor(){
@@ -61,6 +66,7 @@ const  fetchMovies = async (inputResult, page) => {
 
 let userSerchInput = undefined;
 let curentPage = 1;
+let pageName = 'main';
 
 let form = document.querySelector('#serch-form');
 let input = form.querySelector('input');
@@ -79,6 +85,9 @@ input.addEventListener('input', evt => {
 
 //Запуск процесу пошуку фільмів
 form.addEventListener('submit', (evt) => {
+    pageName = 'main';
+    listLi[0].classList.remove('pop-active');
+    listLi[1].classList.remove('fav-active');
     evt.preventDefault();
     showLoadingProcces(true);
     const data = new FormData(evt.target);
@@ -100,8 +109,11 @@ btnLoad.addEventListener('click', (evt) => {
 })
 
 //Завантажити популярні фільми
-let popNow = document.querySelector('#pop-now');
-popNow.addEventListener('click', (evt) => {
+let listLi = document.querySelectorAll('li');
+listLi[0].addEventListener('click', (evt) => {
+    pageName = 'main';
+    listLi[1].classList.remove('fav-active');
+    listLi[0].classList.add('pop-active');
     showBtnLoadMore(false);
     showLoadingProcces(true);
     curentPage = 1;
@@ -109,8 +121,10 @@ popNow.addEventListener('click', (evt) => {
     proccesLoadingMovie(userSerchInput);
 })
 
-let eventFavMovies = document.querySelector('#bookmarks');
-eventFavMovies.addEventListener('click', (evt) => {
+listLi[1].addEventListener('click', (evt) => {
+    pageName = 'fav';
+    listLi[0].classList.remove('pop-active');
+    listLi[1].classList.add('fav-active');
     showBtnLoadMore(false);
     showLoadingProcces(true);
     proccesLoadFavMovies(getElementContent);
@@ -127,6 +141,9 @@ let getElementContent = document.getElementById("content");
         if (isfavorite === true) {
             delFavMovie(elementFilm.id);
             elementFilm.removeAttribute('isfavorite');
+            if (pageName === 'fav'){
+                proccesLoadFavMovies(getElementContent);
+            }
         } else {
             let newFavMovie = new Movie(elementFilm.id, elementFilm.children[0].children[0].src,
                 elementFilm.children[2].innerHTML, true);
@@ -135,12 +152,6 @@ let getElementContent = document.getElementById("content");
         }
     }
 });
-
-const getFavMovies = () => {
-    let curFavMovies = [];
-    curFavMovies = localStorage.getItem('favMovies');
-    return JSON.parse(curFavMovies);
-}
 
 // Фетч фільмів та їх рендер на фронт
 const proccesLoadingMovie = async (inputResult) => {
@@ -179,21 +190,30 @@ const changeChapterName = (inputResult) => {
     let chapterTitle = document.querySelector('#main-title'); 
     let textH2 = chapterTitle.querySelector('h2');
     if(inputResult === undefined){
-        textH2.innerHTML = `Найпопулярніші фільми на даний час`;
+        if (pageName === 'fav'){
+            textH2.innerHTML = `Ваші олюблені фільми`;
+        } else {
+            textH2.innerHTML = `Найпопулярніші фільми на даний час`;
+        }
     }else{
         textH2.innerHTML = `Результат пошуку фільму: ${inputResult}`;
     }   
 }
-
-// рендеремо контент (список фільмів) на фронт 
-const renderMovies = (arrOfMovies, getElement, inputResult) => {
+// рендрер кількості колекції фільмів
+const filmsCountResult = (arrOfMovies, inputResult) => {
     let cauntResult = document.querySelector('#result-caunt');
     if(arrOfMovies.total_results == 0 || arrOfMovies.total_results == undefined){
         cauntResult.innerHTML = `Немає результатів за запитом:'${inputResult}'`;
     }else{
-        cauntResult.innerHTML = `Знайдено фільмів:${arrOfMovies.total_results}`;
+        cauntResult.innerHTML = `Колекція з ${arrOfMovies.total_results} фільмів:`;
     }
-    
+    if (pageName === 'fav'){
+        cauntResult.innerHTML = `Колекція з ${arrOfMovies.length} фільмів:`;
+    }
+}
+// рендеремо контент (список фільмів) на фронт 
+const renderMovies = (arrOfMovies, getElement, inputResult) => {
+    filmsCountResult(arrOfMovies, inputResult);
     let newContent = '';
     let curFavMovies = getFavMovies();
     if(curFavMovies === null){
@@ -240,15 +260,18 @@ const showBtnLoadMore = (show) => {
 
 const proccesLoadFavMovies = (content) => {
     let curFavMovies = getFavMovies();
+    changeChapterName(undefined);
     if(curFavMovies === null){
         curFavMovies = [];
     }
+    filmsCountResult(curFavMovies, undefined);
     let newContent = '';
     newContent = newContent + curFavMovies.reduce((acc, cur) => {
         acc += cardTemplate(cur, true);
         return acc}, "");
     content.innerHTML = newContent;
 }
+
 proccesLoadingMovie(undefined);
 
 
