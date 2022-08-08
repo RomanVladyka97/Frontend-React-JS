@@ -1,15 +1,50 @@
+// Клас фільму
+class Movie {
+    constructor(id, poster_path, title, isFavorite){
+        this.id = id;
+        this.poster_path = poster_path;
+        this.title = title;
+        this.isFavorite = isFavorite;
+    }
+    saveMovie(){
+        let modifyCurFavMovies = getFavMovies();
+        if(modifyCurFavMovies === null){
+            modifyCurFavMovies = [];
+        }
+        modifyCurFavMovies.unshift(this);
+        localStorage.setItem(`favMovies`, JSON.stringify(modifyCurFavMovies));
+    }
+}
+const delFavMovie = (id) => {
+    let CurFavMovies = getFavMovies();
+    if(CurFavMovies !== null){
+        let modifyCurFavMovies = CurFavMovies.filter((favMovies) => (Object.values(favMovies))[0]!== id);
+        localStorage.setItem(`favMovies`, JSON.stringify(modifyCurFavMovies));
+    }
+}
+const getFavMovies = () => {
+    let curFavMovies = [];
+    curFavMovies = localStorage.getItem('favMovies');
+    return JSON.parse(curFavMovies);
+}
 // клас для фетчу фільмів
 class Api {
-    constructor(inputText, page){
+    constructor(){
+        if(typeof Api.instance === 'object'){
+            return Api.instance;
+        }
         this.popUrl = "https://api.themoviedb.org/3/movie/popular?";
         this.serchUrl = "https://api.themoviedb.org/3/search/movie?";
         this.apiKey = "api_key=c1f1bfcf10259d5f3d7bd66da82c97f0&";
         this.language = "language=uk&";
-        this.page = `page=${page}`;
-        this.inputText = inputText;
-
+        this.page = `page=1`;
+        this.inputText = undefined;
+        Api.instance = this;
+        return this;
     }
-    async fetchPopularMovies() {
+    async fetchMovies(inputText, page) {
+        this.inputText = inputText;
+        this.page = `page=${page}`;
         let uri = `query=${encodeURI(this.inputText)}`;
         let response;
         if(this.inputText === undefined){
@@ -22,12 +57,21 @@ class Api {
     }
 }
 
+// Фетч запит до сервака - отримуємо масиви з фільмами
+const  fetchMovies = async (inputResult, page) => {
+    let getMovies = new Api();
+    let moviesList = await getMovies.fetchMovies(inputResult, page);
+    return moviesList;
+}
+
 let userSerchInput = undefined;
 let curentPage = 1;
+let pageName = 'main';
 
 let form = document.querySelector('#serch-form');
 let input = form.querySelector('input');
 let serchButton = form.querySelector('button');
+
 //Атрибути безпеки пошукової кнопки
 input.addEventListener('input', evt => { 
     let count = 0;
@@ -41,6 +85,9 @@ input.addEventListener('input', evt => {
 
 //Запуск процесу пошуку фільмів
 form.addEventListener('submit', (evt) => {
+    pageName = 'main';
+    listLi[0].classList.remove('pop-active');
+    listLi[1].classList.remove('fav-active');
     evt.preventDefault();
     showLoadingProcces(true);
     const data = new FormData(evt.target);
@@ -61,9 +108,12 @@ btnLoad.addEventListener('click', (evt) => {
     proccesLoadingMovie(userSerchInput);
 })
 
-//Завантажити олюблені фільми
-let popNow = document.querySelector('#pop-now');
-popNow.addEventListener('click', (evt) => {
+//Завантажити популярні фільми
+let listLi = document.querySelectorAll('li');
+listLi[0].addEventListener('click', (evt) => {
+    pageName = 'main';
+    listLi[1].classList.remove('fav-active');
+    listLi[0].classList.add('pop-active');
     showBtnLoadMore(false);
     showLoadingProcces(true);
     curentPage = 1;
@@ -71,12 +121,37 @@ popNow.addEventListener('click', (evt) => {
     proccesLoadingMovie(userSerchInput);
 })
 
-// Фетч запит до сервака - отримуємо масиви з фільмами
-const  fetchMovies = async (inputResult, page) => {
-    let getPopularMovies = new Api(inputResult, page);
-    let moviesList = await getPopularMovies.fetchPopularMovies();
-    return moviesList;
-}
+listLi[1].addEventListener('click', (evt) => {
+    pageName = 'fav';
+    listLi[0].classList.remove('pop-active');
+    listLi[1].classList.add('fav-active');
+    showBtnLoadMore(false);
+    showLoadingProcces(true);
+    proccesLoadFavMovies(getElementContent);
+    showLoadingProcces(false);
+})
+
+let getElementContent = document.getElementById("content");
+    getElementContent.addEventListener('click', (evt) => {
+    let ElementLikeBtn = evt.target.closest('#fa-heart');
+    let elementFilm = evt.target.closest('div.card');
+    if(ElementLikeBtn !== null){
+        ElementLikeBtn.classList.toggle('fa-solid');
+        let isfavorite = elementFilm.hasAttribute('isfavorite');
+        if (isfavorite === true) {
+            delFavMovie(elementFilm.id);
+            elementFilm.removeAttribute('isfavorite');
+            if (pageName === 'fav'){
+                proccesLoadFavMovies(getElementContent);
+            }
+        } else {
+            let newFavMovie = new Movie(elementFilm.id, elementFilm.children[0].children[0].src,
+                elementFilm.children[2].innerHTML, true);
+            newFavMovie.saveMovie();    
+            elementFilm.setAttribute('isfavorite', true);
+        }
+    }
+});
 
 // Фетч фільмів та їх рендер на фронт
 const proccesLoadingMovie = async (inputResult) => {
@@ -86,7 +161,6 @@ const proccesLoadingMovie = async (inputResult) => {
     } else {
         arrOfMovies = await fetchMovies(inputResult, curentPage);
     }
-    let getElementContent = document.getElementById("content");
     changeChapterName(inputResult);
     renderMovies(arrOfMovies, getElementContent, inputResult);
     showLoadingProcces(false);
@@ -98,51 +172,64 @@ const proccesLoadingMovie = async (inputResult) => {
 }
 
 // формуємо шаблон карточки фільму для фронта
-const cardTemplate = ({poster_path, id, title}) => {
+const cardTemplate = ({poster_path, id, title}, isFavMovie) => {
     let result = '';
-    //if(poster_path == null){
-        //return '';
-    //}else{
-        return result = `<div id="${id}" class="card">
+    result = `<div ${(isFavMovie === true) ? 'isfavorite="true"' : ''} id="${id}" class="card">
         <div class="card-image">
             <img src="https://image.tmdb.org/t/p/w300${poster_path}" alt="image">
         </div>
+        <a class="card__follow-box follow-box-active">
+            <i id="fa-heart" class="fa-heart fa-regular fa-2xl ${(isFavMovie === true) ? 'fa-solid':''}"></i>
+        </a>
         <h2 class="card__title">${title}</h2>
-        </div>`;
-    //}
+        </div>`;  
+    return result
 }
-
-// 
+//
 const changeChapterName = (inputResult) => {
     let chapterTitle = document.querySelector('#main-title'); 
     let textH2 = chapterTitle.querySelector('h2');
     if(inputResult === undefined){
-        textH2.innerHTML = `Найпопулярніші фільми на даний час`;
+        if (pageName === 'fav'){
+            textH2.innerHTML = `Ваші олюблені фільми`;
+        } else {
+            textH2.innerHTML = `Найпопулярніші фільми на даний час`;
+        }
     }else{
         textH2.innerHTML = `Результат пошуку фільму: ${inputResult}`;
-    }
-    
+    }   
 }
-
-// рендеремо контент (список фільмів) на фронт 
-const renderMovies = (arrOfMovies, getElement, inputResult) => {
+// рендрер кількості колекції фільмів
+const filmsCountResult = (arrOfMovies, inputResult) => {
     let cauntResult = document.querySelector('#result-caunt');
     if(arrOfMovies.total_results == 0 || arrOfMovies.total_results == undefined){
         cauntResult.innerHTML = `Немає результатів за запитом:'${inputResult}'`;
     }else{
-        cauntResult.innerHTML = `Знайдено фільмів:${arrOfMovies.total_results}`;
+        cauntResult.innerHTML = `Колекція з ${arrOfMovies.total_results} фільмів:`;
     }
-    
-    let newContent = ``;
+    if (pageName === 'fav'){
+        cauntResult.innerHTML = `Колекція з ${arrOfMovies.length} фільмів:`;
+    }
+}
+// рендеремо контент (список фільмів) на фронт 
+const renderMovies = (arrOfMovies, getElement, inputResult) => {
+    filmsCountResult(arrOfMovies, inputResult);
+    let newContent = '';
+    let curFavMovies = getFavMovies();
+    if(curFavMovies === null){
+        curFavMovies = [];
+    }
+    let isFavorite;
     newContent = newContent + arrOfMovies.results.reduce((acc, cur) => {
-        acc += cardTemplate(cur, inputResult); 
+        curFavMovies.find((element) => {isFavorite = Object.values(element).includes(`${cur.id}`);
+        return isFavorite;});
+        acc += cardTemplate(cur, isFavorite);
         return acc}, "");
     if(curentPage > 1){
         getElement.insertAdjacentHTML('beforeend', newContent);
     } else {
         getElement.innerHTML = newContent;
     }   
-    
 }
 
 // Показ плашки Загрузка на Фронті під час фетчингу фільмів
@@ -171,8 +258,21 @@ const showBtnLoadMore = (show) => {
     }
 }
 
-proccesLoadingMovie(undefined);
+const proccesLoadFavMovies = (content) => {
+    let curFavMovies = getFavMovies();
+    changeChapterName(undefined);
+    if(curFavMovies === null){
+        curFavMovies = [];
+    }
+    filmsCountResult(curFavMovies, undefined);
+    let newContent = '';
+    newContent = newContent + curFavMovies.reduce((acc, cur) => {
+        acc += cardTemplate(cur, true);
+        return acc}, "");
+    content.innerHTML = newContent;
+}
 
+proccesLoadingMovie(undefined);
 
 
 

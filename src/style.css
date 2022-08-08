@@ -29,11 +29,13 @@ html,body{
 }
 .header__title{
     color: white;
-    font-size: 22px;
+    font-size: 28px;
     font-weight: bold;
     cursor: pointer;
     text-decoration: none;
     transition: all 0.5s;
+    border-right: white solid 7px;
+    padding-right: 15px;
 }
 .header__title:hover{
     color: rgb(209, 212, 176);
@@ -52,14 +54,34 @@ html,body{
     font-weight: bold;
     margin-right: 20px;
     transition: all 0.5s;
-    cursor: default;
-}
-.pop{
     cursor: pointer;
 }
-.pop:hover{
-    color: rgb(209, 212, 176);
+.pop{
+    margin-right: 50px;
+    background-color: none;
+    padding: 8px 20px 8px 20px;
 }
+.pop-active{
+    background-color: #4486e9;
+    border-radius: 7px;
+    cursor: default;
+}
+.pop:hover{
+    box-shadow: 0px 0px 25px #ffffff;
+}
+.fav{
+    background-color: none;
+    padding: 8px 20px 8px 20px;
+    cursor: default;
+}
+.fav-active{
+    background-color: #4486e9;
+    border-radius: 7px;
+}
+.fav:hover{
+    box-shadow: 0px 0px 25px #ffffff;
+}
+
 .header__serch{
     display: flex;
     justify-content: space-between;
@@ -67,6 +89,7 @@ html,body{
     border: #cccccc solid 3px; 
     border-radius: 3px;
     padding: 3px;
+    margin-left: 270px;
 }
 .serch-title{
     margin-right: 8px;
@@ -105,6 +128,7 @@ input{
     flex-wrap: wrap;
     background-color: hsl(48, 46%, 69%);
     padding: 25px;
+    transition: all 0.5s;
 }
 
 .card{
@@ -117,6 +141,7 @@ input{
     margin-top: 5px;
     margin-right: 5px;
     box-shadow: 4px 3px 3px rgb(51, 50, 51);
+    position: relative;
 }
 .card:hover{
     box-shadow: 0px 0px 25px #dd4b39
@@ -140,6 +165,31 @@ img{
 }
 .card__title:hover{
     color: white;
+}
+
+.card__follow-box{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 355px;
+    left: 200px;
+    z-index: 1;
+    background-color: white;
+    color: #032541;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+    transition: all 0.5s;
+}
+.card__follow-box:hover{
+    box-shadow: 4px 3px 3px rgb(51, 50, 51);
+    transition: all 0.5s;
+}
+.fa-regular::after{
+    background-color: #dd4b39;
+    color: #dd4b39;
 }
 
 .main__loading{
