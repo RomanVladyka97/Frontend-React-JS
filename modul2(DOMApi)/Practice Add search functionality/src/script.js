@@ -13,7 +13,7 @@ class Api {
         Api.instance = this;
         return this;
     }
-    async fetchPopularMovies(inputText, page) {
+    async fetchMovies(inputText, page) {
         this.inputText = inputText;
         this.page = `page=${page}`;
         let uri = `query=${encodeURI(this.inputText)}`;
@@ -28,12 +28,20 @@ class Api {
     }
 }
 
+// Фетч запит до сервака - отримуємо масиви з фільмами
+const  fetchMovies = async (inputResult, page) => {
+    let getMovies = new Api();
+    let moviesList = await getMovies.fetchMovies(inputResult, page);
+    return moviesList;
+}
+
 let userSerchInput = undefined;
 let curentPage = 1;
 
 let form = document.querySelector('#serch-form');
 let input = form.querySelector('input');
 let serchButton = form.querySelector('button');
+
 //Атрибути безпеки пошукової кнопки
 input.addEventListener('input', evt => { 
     let count = 0;
@@ -77,18 +85,9 @@ popNow.addEventListener('click', (evt) => {
     proccesLoadingMovie(userSerchInput);
 })
 
-// Фетч запит до сервака - отримуємо масиви з фільмами
-const  fetchMovies = async (inputResult, page) => {
-    let getPopularMovies = new Api();
-    console.log(getPopularMovies);
-    let moviesList = await getPopularMovies.fetchPopularMovies(inputResult, page);
-    return moviesList;
-}
-
 // Фетч фільмів та їх рендер на фронт
 const proccesLoadingMovie = async (inputResult) => {
     let arrOfMovies;
-    console.log(inputResult);
     if(curentPage == 1 ){
         arrOfMovies = await fetchMovies(inputResult);
     } else {
@@ -108,16 +107,17 @@ const proccesLoadingMovie = async (inputResult) => {
 // формуємо шаблон карточки фільму для фронта
 const cardTemplate = ({poster_path, id, title}) => {
     let result = '';
-    //if(poster_path == null){
-        //return '';
-    //}else{
-        return result = `<div id="${id}" class="card">
+    result = `<div id="${id}" class="card">
         <div class="card-image">
             <img src="https://image.tmdb.org/t/p/w300${poster_path}" alt="image">
         </div>
+        <a class="card__follow-box follow-box-active">
+            <i id="fa-heart" class="fa-heart fa-regular fa-2xl"></i>
+        </a>
         <h2 class="card__title">${title}</h2>
-        </div>`;
-    //}
+        </div>`;  
+     
+    return result
 }
 
 // 
@@ -149,7 +149,7 @@ const renderMovies = (arrOfMovies, getElement, inputResult) => {
         getElement.insertAdjacentHTML('beforeend', newContent);
     } else {
         getElement.innerHTML = newContent;
-    }   
+    }  
     
 }
 
@@ -180,7 +180,6 @@ const showBtnLoadMore = (show) => {
 }
 
 proccesLoadingMovie(undefined);
-
 
 
 
