@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./src/style.css">
+    <script src="https://kit.fontawesome.com/ca3bc2dd4e.js" crossorigin="anonymous"></script>
+    <title>Add bookmarks (like) to movie</title>
+</head>
+<body>
+    
+    <div class="wrapper">
+        <header class="header">
+            <div class="container header__container">
+                <span ><a href="./index.html" class="header__title">TheMovieDB PoC</a></span>
+                <nav class="header__navigation nav">
+                    <ul class="nav__list">
+                        <li class="nav__list pop pop-active" id="pop-now">Popular Movies</li>
+                        <li class="nav__list fav" id="bookmarks">Bookmarks</li>
+                    </ul>
+                    <form id="serch-form" class="header__serch">
+                        <span class="serch-title">Знайти фільм</span>
+                        <input name="text" placeholder="Search">
+                        <button disabled type="submit" class="serch-submit"> Пошук </button>
+                    </form>
+                </nav>
+            </div>
+        </header>
+        <main class="main">
+            <div class="container main__container" id="main-container">
+                <div class="main__title" id="main-title">
+                    <h2></h2>
+                </div>
+                <h2 class="main__serch-result" id="result-caunt"></h2>
+                <div id="content" class="main__content">
+                </div>
+                <div id="loading-procces" class="main__loading">
+                    <span hidden >Завантаження</span>
+                    <div hidden class="animation__dots dot1"></div>
+                    <div hidden class="animation__dots dot2"></div>
+                    <div hidden class="animation__dots dot3"></div>
+                </div>
+                <button hidden type="submit" class="main__load-more" id="load-more">Завантажити ще</button>
+            </div>
+        </main>
+        <footer class="footer">
+            <div class="container footer__container">Practice: Add bookmarks (like) to movie</div>
+        </footer>
+    </div>
+
+    <script type="module" src="./src/script.js"></script>
+</body>
+</html>
